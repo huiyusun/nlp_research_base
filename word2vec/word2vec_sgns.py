@@ -9,16 +9,56 @@ import json
 import os
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple, Iterable
+
 import numpy as np
+
+# Optional: spaCy tokenizer
+try:
+    import spacy
+
+    _HAVE_SPACY = True
+except Exception:
+    _HAVE_SPACY = False
 
 
 # --------------------------
-# Utils: tokenization
+# Tokenizers
 # --------------------------
 def simple_tokenize(text: str) -> List[str]:
     # Minimal tokenizer; replace with your own for better results.
     # Lowercase, keep letters/numbers and split on whitespace.
     return "".join(ch.lower() if ch.isalnum() or ch.isspace() else " " for ch in text).split()
+
+
+# --- spaCy tokenizer (preferable to the simple one) ---
+_SPACY_NLP = None
+
+
+def _load_spacy_pipeline(model_name: str = "en_core_web_sm"):
+    global _SPACY_NLP
+    if _SPACY_NLP is not None:
+        return _SPACY_NLP
+    if not _HAVE_SPACY:
+        raise RuntimeError("spaCy is not installed. Run: pip install spacy && python -m spacy download en_core_web_sm")
+    try:
+        # Light pipeline: we only need the tokenizer. Disable heavy components.
+        nlp = spacy.load(model_name, disable=["tagger", "parser", "ner", "lemmatizer", "attribute_ruler"])
+    except Exception:
+        # Fallback to a blank English tokenizer if the model isn't installed
+        nlp = spacy.blank("en")
+    _SPACY_NLP = nlp
+    return _SPACY_NLP
+
+
+def spacy_tokenize(text: str, model_name: str = "en_core_web_sm") -> List[str]:
+    """
+    Tokenize with spaCy. Keeps punctuation as separate tokens and preserves
+    useful tokens like numbers and contractions better than the simple tokenizer.
+    """
+    nlp = _load_spacy_pipeline(model_name)
+    # Use the tokenizer directly for speed; no need to create Doc via nlp(text) with disabled pipes.
+    doc = nlp.make_doc(text)
+    return [t.text.lower() for t in doc if not t.is_space]
 
 
 # --------------------------
@@ -332,6 +372,9 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Train Word2Vec SGNS from scratch (NumPy).")
     parser.add_argument("--text", type=str, default="", help="Path to a raw text file (UTF-8). If empty, use demo text.")
+    parser.add_argument("--tokenizer", type=str, default="simple", choices=["simple", "spacy"],
+                        help="Which tokenizer to use. 'spacy' generally yields better tokenization.")
+    parser.add_argument("--spacy_model", type=str, default="en_core_web_sm", help="spaCy model name (if --tokenizer=spacy).")
     parser.add_argument("--dim", type=int, default=100)
     parser.add_argument("--window", type=int, default=5)
     parser.add_argument("--neg", type=int, default=5)
@@ -345,7 +388,13 @@ def main():
     args = parser.parse_args()
 
     text = load_corpus_from_file(args.text) if args.text else DEMO_TEXT
-    tokens = simple_tokenize(text)
+    # Choose tokenizer
+    if args.tokenizer == "spacy":
+        if not _HAVE_SPACY:
+            raise RuntimeError("Asked for --tokenizer=spacy but spaCy is not installed. Install with: pip install spacy")
+        tokens = spacy_tokenize(text, model_name=args.spacy_model)
+    else:
+        tokens = simple_tokenize(text)
     vocab = build_vocab(tokens, min_count=args.min_count)
     corpus_ids = corpus_to_ids(tokens, vocab)
 
