@@ -1,0 +1,17 @@
+# Ignore the virtual environment
+venv/
+
+# Ignore large datasets
+word2vec/data/
+
+# Ignore cache, build, and temporary files
+__pycache__/
+*.pyc
+*.pyo
+*.tmp
+*.log
+.DS_Store
+
+# Ignore IDE settings
+.idea/
+.vscode/
