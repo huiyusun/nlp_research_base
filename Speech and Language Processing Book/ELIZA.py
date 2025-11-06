@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 ELIZA-like chatbot with pluggable rule sets.
 Default domain: IT Helpdesk triage (different from Rogerian psychotherapist).
@@ -10,9 +9,6 @@ How it works (high level):
 - Rules can include capture groups; captured text is passed through a
   reflection map (I->you, my->your, etc.) and substituted into response templates.
 - If no rule matches, we fall back to generic prompts.
-
-Run:
-    python ELIZA.py
 
 Type 'quit', 'exit', or 'bye' to end the session.
 """
