@@ -17,7 +17,7 @@ from __future__ import annotations
 import re
 import random
 import sys
-from typing import Callable, Dict, List, Pattern, Tuple
+from typing import Callable, Dict, List, Pattern
 
 # -----------------------------
 # Reflection map (pronoun swap)
