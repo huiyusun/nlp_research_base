@@ -1,5 +1,5 @@
 # Ignore the virtual environment
-venv/
+BERT/datasets/
 
 # Ignore large datasets
 word2vec/data/
