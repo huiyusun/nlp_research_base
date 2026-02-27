@@ -9,7 +9,7 @@ from transformers import (
 )
 
 MODEL_NAME = "bert-base-uncased"  # Models: distilbert-base-uncased
-DATASET = "thunlp/docred"  # yelp_review_full,
+DATASET = "yelp_review_full"
 NUM_LABELS = 5
 TRAIN_SAMPLES = 5000  # Keep these small for local iteration.
 EVAL_SAMPLES = 1000
