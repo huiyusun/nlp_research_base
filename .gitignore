@@ -1,7 +1,8 @@
 # Ignore the virtual environment
-BERT/datasets/
+BERT/data/
+BERT/outputs/
 
-# Ignore large datasets
+# Ignore large data
 word2vec/data/
 
 # Ignore cache, build, and temporary files
